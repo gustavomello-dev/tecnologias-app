@@ -1,0 +1,43 @@
+<header class="topbar"><a class="brand" href="/">Tech<span>Catalog</span></a><span class="tag">Angular + Node.js</span></header>
+<main>
+  @if (error()) { <div class="alert error" role="alert">{{ error() }}</div> }
+  @if (message()) { <div class="alert success" role="status">{{ message() }}</div> }
+  @if (initializing()) { <p role="status">Carregando sessão...</p> }
+  @else if (!api.user()) {
+    <section class="auth-layout">
+      <div class="intro"><p class="eyebrow">SEU CATÁLOGO DE CONHECIMENTO</p><h1>Organize as tecnologias do seu próximo passo.</h1><p>Cadastre ferramentas, identifique a linguagem base e registre o tempo estimado para alcançar proficiência.</p><div class="pills"><span>Cadastro completo</span><span>Acesso autenticado</span><span>Dados persistentes</span></div></div>
+      <div class="card"><h2>{{ registering() ? 'Crie sua conta' : 'Bem-vindo de volta' }}</h2><p class="muted">{{ registering() ? 'Preencha seus dados para começar.' : 'Entre para acessar suas tecnologias.' }}</p>
+        <form [formGroup]="authForm" (ngSubmit)="authenticate()">
+          @if (registering()) { <label for="name">Nome</label><input id="name" formControlName="name" autocomplete="name" maxlength="100" placeholder="Seu nome"> }
+          <label for="email">E-mail</label><input id="email" type="email" formControlName="email" autocomplete="email" placeholder="voce@exemplo.com">
+          <label for="password">Senha</label><input id="password" type="password" formControlName="password" [attr.autocomplete]="registering() ? 'new-password' : 'current-password'" placeholder="Pelo menos 8 caracteres">
+          @if (authForm.invalid && authForm.touched) { <p class="field-error">Confira os campos. A senha deve ter pelo menos 8 caracteres; no cadastro, o nome deve ter de 2 a 100.</p> }
+          <button class="primary full" type="submit" [disabled]="busy()">{{ busy() ? 'Aguarde...' : registering() ? 'Criar conta' : 'Entrar' }}</button>
+        </form><button class="link full" type="button" (click)="switchMode()" [disabled]="busy()">{{ registering() ? 'Já tenho uma conta' : 'Ainda não tenho conta' }}</button>
+      </div>
+    </section>
+  } @else {
+    <section class="page-heading"><div><p class="eyebrow">PAINEL DE TECNOLOGIAS</p><h1>Olá, {{ api.user()?.name }}.</h1><p class="muted">Gerencie seu catálogo e planeje sua aprendizagem.</p></div><button (click)="logout()" [disabled]="busy()">Sair da conta</button></section>
+    <section class="stats"><article class="card"><span>Tecnologias na busca</span><strong>{{ items().length }}</strong></article><article class="card"><span>Horas estimadas na busca</span><strong>{{ totalHours() }} h</strong></article><article class="card"><span>Sua sessão</span><strong class="small">Autenticada</strong></article></section>
+    <div class="dashboard">
+      <section class="card editor"><h2>{{ editing() === null ? 'Nova tecnologia' : 'Editar tecnologia' }}</h2><p class="muted">Informe a base e o tempo até a proficiência.</p>
+        <form [formGroup]="techForm" (ngSubmit)="save()">
+          <label for="technology-name">Nome da tecnologia</label><input id="technology-name" formControlName="name" maxlength="100" placeholder="Ex.: Angular, React, Vue">
+          @if (techForm.controls.name.invalid && techForm.controls.name.touched) { <p class="field-error">Informe um nome de 2 a 100 caracteres.</p> }
+          <label for="base">Linguagem base</label><select id="base" formControlName="base">@for (base of bases; track base) { <option [value]="base">{{ base }}</option> }</select>
+          <label for="hours">Curva de aprendizado (horas)</label><input id="hours" type="number" min="1" max="100000" step="1" formControlName="learningHours"><small>Tempo estimado para ficar proficiente.</small>
+          @if (techForm.controls.learningHours.invalid && techForm.controls.learningHours.touched) { <p class="field-error">Use um número inteiro de 1 a 100000.</p> }
+          <button type="submit" class="primary full" [disabled]="busy()">{{ busy() ? 'Salvando...' : editing() === null ? 'Cadastrar tecnologia' : 'Salvar alterações' }}</button>
+          @if (editing() !== null) { <button class="full" type="button" (click)="reset()" [disabled]="busy()">Cancelar edição</button> }
+        </form>
+      </section>
+      <section class="card listing"><div class="list-heading"><h2>Minhas tecnologias</h2></div><form class="search" (ngSubmit)="load()"><input aria-label="Buscar tecnologia por nome" name="search" [(ngModel)]="search" placeholder="Buscar pelo nome..."><button type="submit" [disabled]="loading()">Buscar</button></form>
+        @if (loading()) { <p role="status">Carregando tecnologias...</p> }
+        @else { <div class="table-wrap"><table><thead><tr><th>Nome</th><th>Base</th><th>Aprendizado</th><th>Ações</th></tr></thead><tbody>
+          @for (item of items(); track item.id) { <tr><td class="tech-name">{{ item.name }}</td><td><span class="badge">{{ item.base }}</span></td><td>{{ item.learningHours }} h</td><td><div class="actions"><button type="button" (click)="edit(item)" [disabled]="busy()">Editar</button><button type="button" class="danger" (click)="remove(item)" [disabled]="busy()">Excluir</button></div></td></tr> }
+          @empty { <tr><td colspan="4" class="empty">Nenhuma tecnologia encontrada. Cadastre uma ou ajuste a busca.</td></tr> }
+        </tbody></table></div> }
+      </section>
+    </div>
+  }
+</main><footer>TechCatalog · Projeto acadêmico de cadastro de tecnologias</footer>
