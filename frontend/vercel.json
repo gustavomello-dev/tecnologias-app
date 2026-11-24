@@ -1,11 +1,11 @@
 {
-    "$schema": "https://openapi.vercel.sh/vercel.json",
-    "buildCommand": "npm run build -- --configuration production",
-    "outputDirectory": "dist/pdv-frontend/browser",
-    "rewrites": [
-        {
-            "source": "/(.*)",
-            "destination": "/index.html"
-        }
-    ]
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist/web/browser",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://Tecnologias-env.eba-ukzpntde.us-east-2.elasticbeanstalk.com/api/:path*"
+    }
+  ]
 }
